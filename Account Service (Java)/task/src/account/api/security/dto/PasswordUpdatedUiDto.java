@@ -1,4 +1,4 @@
-package account.api.security;
+package account.api.security.dto;
 
 public class PasswordUpdatedUiDto {
     private final String email;

@@ -1,5 +1,8 @@
 package account.api.security;
 
+import account.api.security.dto.NewPasswordUiDto;
+import account.api.security.dto.PasswordUpdatedUiDto;
+import account.api.security.dto.SignupUiDto;
 import account.domain.UserAccount;
 import account.domain.repositories.UserRepository;
 import account.exception.UserExistsException;

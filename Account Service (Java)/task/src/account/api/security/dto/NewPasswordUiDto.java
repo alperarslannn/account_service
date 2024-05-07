@@ -1,4 +1,4 @@
-package account.api.security;
+package account.api.security.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
