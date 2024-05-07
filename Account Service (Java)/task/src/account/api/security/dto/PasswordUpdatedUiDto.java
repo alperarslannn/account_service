@@ -4,9 +4,9 @@ public class PasswordUpdatedUiDto {
     private final String email;
     private final String status;
 
-    public PasswordUpdatedUiDto(String email, String status) {
+    public PasswordUpdatedUiDto(String email) {
         this.email = email;
-        this.status = status;
+        this.status = "The password has been updated successfully";
     }
 
     public String getEmail() {

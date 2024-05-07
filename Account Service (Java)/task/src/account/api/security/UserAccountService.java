@@ -38,9 +38,9 @@ public class UserAccountService {
 
     public PasswordUpdatedUiDto updatePassword(NewPasswordUiDto newPasswordUiDto, Authentication authentication){
         UserAccount userAccount = ((CustomUserDetails) authentication.getPrincipal()).getUser();
-        userAccount.setPassword(newPasswordUiDto.getNewPassword());
+        userAccount.setPassword(newPasswordUiDto.getNew_password());
         UserAccount savedUserAccount = userRepository.save(userAccount);
 
-        return new PasswordUpdatedUiDto(savedUserAccount.getEmail(), "The password has been updated successfully");
+        return new PasswordUpdatedUiDto(savedUserAccount.getEmail());
     }
 }
