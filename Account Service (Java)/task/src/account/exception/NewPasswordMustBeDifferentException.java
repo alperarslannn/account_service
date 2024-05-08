@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.LocalDateTime;
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "User exist!")
-public class UserExistsException extends BaseException {
+@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "The passwords must be different!")
+public class NewPasswordMustBeDifferentException extends BaseException {
     private final LocalDateTime timestamp;
 
-    public UserExistsException() {
+    public NewPasswordMustBeDifferentException() {
         super();
         timestamp = LocalDateTime.now();
     }

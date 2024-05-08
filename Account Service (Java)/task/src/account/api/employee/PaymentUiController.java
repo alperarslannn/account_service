@@ -1,7 +1,7 @@
 package account.api.employee;
 
 import account.api.security.CustomUserDetails;
-import account.api.security.UserUiDto;
+import account.api.security.dto.UserUiDto;
 import account.domain.UserAccount;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

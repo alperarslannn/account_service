@@ -5,11 +5,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.LocalDateTime;
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "User exist!")
-public class UserExistsException extends BaseException {
+
+@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+public class BaseException extends RuntimeException {
     private final LocalDateTime timestamp;
 
-    public UserExistsException() {
+    public BaseException() {
         super();
         timestamp = LocalDateTime.now();
     }

@@ -3,8 +3,10 @@ package account.api.security;
 import account.api.security.dto.NewPasswordUiDto;
 import account.api.security.dto.PasswordUpdatedUiDto;
 import account.api.security.dto.SignupUiDto;
+import account.api.security.dto.UserUiDto;
 import account.domain.UserAccount;
 import account.domain.repositories.UserRepository;
+import account.exception.NewPasswordMustBeDifferentException;
 import account.exception.UserExistsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,10 @@ public class UserAccountService {
 
     public PasswordUpdatedUiDto updatePassword(NewPasswordUiDto newPasswordUiDto, Authentication authentication){
         UserAccount userAccount = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+        if(userAccount.getPassword().equals(newPasswordUiDto.getNew_password())){
+            throw new NewPasswordMustBeDifferentException();
+        }
+
         userAccount.setPassword(newPasswordUiDto.getNew_password());
         UserAccount savedUserAccount = userRepository.save(userAccount);
 

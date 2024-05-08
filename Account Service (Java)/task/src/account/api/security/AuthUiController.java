@@ -3,6 +3,7 @@ package account.api.security;
 import account.api.security.dto.NewPasswordUiDto;
 import account.api.security.dto.PasswordUpdatedUiDto;
 import account.api.security.dto.SignupUiDto;
+import account.api.security.dto.UserUiDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
