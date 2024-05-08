@@ -25,6 +25,9 @@ public class UserAccount {
     @Column
     private String password;
 
+    @Column
+    private String salt;
+
     public Long getId() {
         return id;
     }
@@ -61,6 +64,14 @@ public class UserAccount {
         this.password = password;
     }
 
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
     @Override
     public String toString() {
         return "UserAccount{" +
@@ -71,4 +82,5 @@ public class UserAccount {
                 ", password='" + password + '\'' +
                 '}';
     }
+
 }

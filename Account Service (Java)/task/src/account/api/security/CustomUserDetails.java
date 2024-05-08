@@ -1,6 +1,5 @@
 package account.api.security;
 
-import account.domain.UserAccount;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -8,14 +7,14 @@ import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails
 {
-    private UserAccount userAccount;
+    private String email;
+    private String password;
+    private String salt;
 
-    public CustomUserDetails(UserAccount userAccount) {
-        this.userAccount = userAccount;
-    }
-
-    public UserAccount getUser() {
-        return userAccount;
+    public CustomUserDetails(String email, String password, String salt) {
+        this.email = email;
+        this.password = password;
+        this.salt = salt;
     }
 
     @Override
@@ -25,12 +24,16 @@ public class CustomUserDetails implements UserDetails
 
     @Override
     public String getPassword() {
-        return userAccount.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return userAccount.getEmail();
+        return email;
+    }
+
+    public String getSalt() {
+        return salt;
     }
 
     @Override
