@@ -2,20 +2,17 @@ package account.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+import java.util.UUID;
+
 @Entity
-@Table(name = "userCustom")
+@Table(name = "user_account")
 public class UserAccount {
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "USER_DETAILS_SEQ", allocationSize = 1)
-    private Long id;
+    private UUID id;
     @Column
     private String name;
     @Column
@@ -28,7 +25,12 @@ public class UserAccount {
     @Column
     private String salt;
 
-    public Long getId() {
+    public UserAccount()
+    {
+        id = UUID.randomUUID();
+    }
+
+    public UUID getId() {
         return id;
     }
 
