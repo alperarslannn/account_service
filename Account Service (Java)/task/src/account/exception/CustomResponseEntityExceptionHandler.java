@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class CustomResponseEntityExceptionHandler {
 
-    @ExceptionHandler({ UserExistsException.class, NewPasswordMustBeDifferentException.class })
+    @ExceptionHandler({ UserExistsException.class, NewPasswordMustBeDifferentException.class, PasswordBreachedException.class})
     public ResponseEntity<RestError> handleUserExistExceptionException(BaseException ex, HttpServletRequest request) {
         ResponseStatus responseStatusAnnotation = ex.getClass().getAnnotation(ResponseStatus.class);
         RestError re = new RestError(ex.getTimestamp(), HttpStatus.BAD_REQUEST.value(),
