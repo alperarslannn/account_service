@@ -4,11 +4,12 @@ import account.domain.UserAccount;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserAccountRepository extends CrudRepository<UserAccount, Long> {
+public interface UserAccountRepository extends CrudRepository<UserAccount, UUID> {
 
     @Override
-    Optional<UserAccount> findById(Long id);
+    Optional<UserAccount> findById(UUID id);
 
     Optional<UserAccount> findByEmailEqualsIgnoreCase(String email);
 }

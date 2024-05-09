@@ -4,9 +4,11 @@ import account.api.security.dto.NewPasswordUiDto;
 import account.api.security.dto.PasswordUpdatedUiDto;
 import account.api.security.dto.SignupUiDto;
 import account.api.security.dto.UserUiDto;
+import account.domain.UserAccount;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,12 @@ public class AuthUiController {
     @PostMapping(value="/signup")
     public ResponseEntity<UserUiDto> signup(@Validated @RequestBody SignupUiDto signupUiDto){
         return ResponseEntity.ok(userAccountService.addUser(signupUiDto));
+    }
+
+    @GetMapping(value="/signin")
+    public ResponseEntity<UserUiDto> signin(Authentication authentication){
+        UserAccount userAccount = userAccountService.findByUsername(((CustomUserDetails) authentication.getPrincipal()).getUsername());
+        return ResponseEntity.ok(new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail()));
     }
 
     @PostMapping(value="/changepass")

@@ -103,4 +103,8 @@ public class UserAccountService {
     private boolean checkNewPasswordIsTheSame(String password, String hashedPassword) {
         return encoder.matches(password, hashedPassword);
     }
+
+    public UserAccount findByUsername(String username) {
+        return userAccountRepository.findByEmailEqualsIgnoreCase(username).orElseThrow(() -> new IllegalStateException("User not found!"));
+    }
 }

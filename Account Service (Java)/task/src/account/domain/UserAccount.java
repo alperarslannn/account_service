@@ -3,8 +3,10 @@ package account.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -17,13 +19,14 @@ public class UserAccount {
     private String name;
     @Column
     private String lastname;
-    @Column(unique = true)
+    @Column(name = "email_username", unique = true)
     private String email;
     @Column
     private String password;
-
     @Column
     private String salt;
+    @OneToMany(mappedBy = "userAccount")
+    private List<Employee> employees;
 
     public UserAccount()
     {
@@ -74,15 +77,15 @@ public class UserAccount {
         this.salt = salt;
     }
 
-    @Override
-    public String toString() {
-        return "UserAccount{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", lastname='" + lastname + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+    public List<Employee> getEmployees() {
+        return employees;
     }
 
+    public void setEmployees(List<Employee> employees) {
+        this.employees = employees;
+    }
+
+    public void addEmployee(Employee employee) {
+        this.employees.add(employee);
+    }
 }
