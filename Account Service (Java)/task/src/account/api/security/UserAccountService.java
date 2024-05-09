@@ -1,34 +1,57 @@
 package account.api.security;
 
 import account.AccountServiceApplication;
+import account.api.admin.dto.UserRoleUiDto;
 import account.api.security.dto.NewPasswordUiDto;
 import account.api.security.dto.PasswordUpdatedUiDto;
 import account.api.security.dto.SignupUiDto;
 import account.api.security.dto.UserUiDto;
+import account.domain.Group;
 import account.domain.UserAccount;
+import account.domain.repositories.GroupRepository;
 import account.domain.repositories.UserAccountRepository;
+import account.exception.AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException;
 import account.exception.NewPasswordMustBeDifferentException;
 import account.exception.PasswordBreachedException;
+import account.exception.RoleNotFoundException;
+import account.exception.UserDoesNotHaveRoleException;
 import account.exception.UserExistsException;
+import account.exception.UserHasOnlyOneRoleException;
+import account.exception.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
 public class UserAccountService {
     private final UserAccountRepository userAccountRepository;
+    private final GroupRepository groupRepository;
     private final CustomBCryptPasswordEncoder encoder;
 
 
-    public UserAccountService(UserAccountRepository userAccountRepository, CustomBCryptPasswordEncoder encoder) {
+    public UserAccountService(UserAccountRepository userAccountRepository, GroupRepository groupRepository, CustomBCryptPasswordEncoder encoder) {
         this.userAccountRepository = userAccountRepository;
+        this.groupRepository = groupRepository;
         this.encoder = encoder;
     }
+
+    public List<UserUiDto> findAllUsers(){
+        List<UserUiDto> userUiDtoList = new ArrayList<>();
+        userAccountRepository.findAllByOrderByIdAsc().forEach(userAccount -> {
+            UserUiDto userUiDto = new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString());
+            userUiDtoList.add(userUiDto);
+        });
+        return userUiDtoList;
+    }
+
 
     public UserUiDto addUser(SignupUiDto signupUiDto){
 
@@ -51,10 +74,18 @@ public class UserAccountService {
         userAccount.setLastname(signupUiDto.getLastname());
         userAccount.setPassword(hashedPassword);
         userAccount.setSalt(salt);
+
+        List<Group> roles = new ArrayList<>();
+        if (userAccountRepository.findFirstByRoles(groupRepository.findByName(Roles.ROLE_ADMINISTRATOR.toString())).isPresent()) {
+            roles.add(groupRepository.findByName(Roles.ROLE_USER.toString()));
+        } else {
+            roles.add(groupRepository.findByName(Roles.ROLE_ADMINISTRATOR.toString()));
+        }
+        userAccount.setRoles(roles);
         UserAccount savedUserAccount = userAccountRepository.save(userAccount);
 
         return new UserUiDto(savedUserAccount.getId(), savedUserAccount.getName(),
-                savedUserAccount.getLastname(), savedUserAccount.getEmail());
+                savedUserAccount.getLastname(), savedUserAccount.getEmail(), savedUserAccount.getRolesAsString());
     }
 
     public PasswordUpdatedUiDto updatePassword(NewPasswordUiDto newPasswordUiDto, Authentication authentication){
@@ -105,6 +136,50 @@ public class UserAccountService {
     }
 
     public UserAccount findByUsername(String username) {
-        return userAccountRepository.findByEmailEqualsIgnoreCase(username).orElseThrow(() -> new IllegalStateException("User not found!"));
+        return userAccountRepository.findByEmailEqualsIgnoreCase(username).orElseThrow(UserNotFoundException::new);
+    }
+
+    @Transactional
+    public void deleteUserAccount(String email, Authentication authentication) {
+        findByUsername(email);
+        if(((CustomUserDetails) authentication.getPrincipal()).getUsername().equals(email)){
+            throw new AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException();
+        }
+        userAccountRepository.deleteUserAccountByEmail(email);
+    }
+
+    @Transactional
+    public UserUiDto setUserAccountRoles(UserRoleUiDto userRoleUiDto) {
+        UserAccount userAccount = userAccountRepository.findByEmailEqualsIgnoreCase(userRoleUiDto.getUser()).orElseThrow(UserNotFoundException::new);
+        Group requiredRole = groupRepository.findByName(userRoleUiDto.getRole().toString());
+        Group administratorRole = groupRepository.findByName(Roles.ROLE_ADMINISTRATOR.name());
+        Group userRole = groupRepository.findByName(Roles.ROLE_USER.name());
+        Group accountantRole = groupRepository.findByName(Roles.ROLE_ACCOUNTANT.name());
+
+        //todo fix business exceptions
+        if(Objects.isNull(requiredRole)) throw new RoleNotFoundException();
+        if (!userAccount.getRoles().contains(requiredRole)){
+            throw new UserDoesNotHaveRoleException();
+        }
+        if (userAccount.getRoles().size() == 1 && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
+            throw new UserHasOnlyOneRoleException();
+        }
+        if (userRoleUiDto.getRole().equals(Roles.ROLE_ADMINISTRATOR) && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
+            throw new AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException();
+        }
+        if(userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
+            if ((userRoleUiDto.getRole().equals(Roles.ROLE_ADMINISTRATOR) && (userAccount.getRoles().contains(userRole) || userAccount.getRoles().contains(accountantRole)))
+                    || ((userRoleUiDto.getRole().equals(Roles.ROLE_USER) || userRoleUiDto.getRole().equals(Roles.ROLE_ACCOUNTANT)) && userAccount.getRoles().contains(administratorRole))){
+                throw new AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException();
+            }
+        }
+
+        if (userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
+            userAccount.addRole(requiredRole);
+        } else {
+            userAccount.removeRole(requiredRole);
+        }
+        userAccountRepository.save(userAccount);
+        return new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString());
     }
 }

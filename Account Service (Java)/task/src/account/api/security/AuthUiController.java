@@ -31,7 +31,7 @@ public class AuthUiController {
     @GetMapping(value="/signin")
     public ResponseEntity<UserUiDto> signin(Authentication authentication){
         UserAccount userAccount = userAccountService.findByUsername(((CustomUserDetails) authentication.getPrincipal()).getUsername());
-        return ResponseEntity.ok(new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail()));
+        return ResponseEntity.ok(new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString()));
     }
 
     @PostMapping(value="/changepass")

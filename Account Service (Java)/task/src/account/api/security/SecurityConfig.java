@@ -31,13 +31,15 @@ import java.util.Optional;
         jsr250Enabled = true)
 public class SecurityConfig {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     private final UserAccountRepository userAccountRepository;
     private final CustomBCryptPasswordEncoder encoder;
 
 
-    public SecurityConfig(RestAuthenticationEntryPoint restAuthenticationEntryPoint, UserAccountRepository userAccountRepository, CustomBCryptPasswordEncoder encoder) {
+    public SecurityConfig(RestAuthenticationEntryPoint restAuthenticationEntryPoint, CustomAccessDeniedHandler customAccessDeniedHandler, UserAccountRepository userAccountRepository, CustomBCryptPasswordEncoder encoder) {
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
         this.userAccountRepository = userAccountRepository;
         this.encoder = encoder;
     }
@@ -49,7 +51,7 @@ public class SecurityConfig {
             if (user.isEmpty()) {
                 throw new UsernameNotFoundException(username);
             }
-            CustomUserDetails customUserDetails = new CustomUserDetails(user.get().getEmail(), user.get().getPassword(), user.get().getSalt());
+            CustomUserDetails customUserDetails = new CustomUserDetails(user.get().getEmail(), user.get().getPassword(), user.get().getSalt(), user.get().getGrantedAuthorities());
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, customUserDetails.getPassword());
             context.setAuthentication(authentication);
@@ -71,6 +73,8 @@ public class SecurityConfig {
 
         http
                 .httpBasic(Customizer.withDefaults())
+                .exceptionHandling().accessDeniedHandler(customAccessDeniedHandler)
+                .and()
                 //.exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint)) // Handle auth errors
                 .csrf(AbstractHttpConfigurer::disable) // For Postman
                 .headers(headers -> headers.frameOptions().disable()) // For the H2 console
@@ -80,6 +84,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/acct/payments").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/acct/payments").permitAll()
                                 .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
+                                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/user/**")).hasAuthority(Roles.ROLE_ADMINISTRATOR.toString())
                                 .anyRequest().authenticated()
                         // other matchers
                 )

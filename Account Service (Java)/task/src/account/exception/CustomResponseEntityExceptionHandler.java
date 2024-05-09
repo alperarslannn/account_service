@@ -16,13 +16,12 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class CustomResponseEntityExceptionHandler {
 
-    @ExceptionHandler({ UserExistsException.class, NewPasswordMustBeDifferentException.class,
-            PasswordBreachedException.class, UserDoesNotExistsException.class, InvalidPeriodException.class})
+    @ExceptionHandler({ BaseException.class })
     public ResponseEntity<RestError> handleUserExistException(BaseException ex, HttpServletRequest request) {
         ResponseStatus responseStatusAnnotation = ex.getClass().getAnnotation(ResponseStatus.class);
-        RestError re = new RestError(ex.getTimestamp(), HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(), responseStatusAnnotation.reason(), request.getServletPath());
-        return new ResponseEntity<>(re, HttpStatus.BAD_REQUEST);
+        RestError re = new RestError(ex.getTimestamp(), responseStatusAnnotation.code().value(),
+                responseStatusAnnotation.code().getReasonPhrase(), responseStatusAnnotation.reason(), request.getServletPath());
+        return new ResponseEntity<>(re, responseStatusAnnotation.code());
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})

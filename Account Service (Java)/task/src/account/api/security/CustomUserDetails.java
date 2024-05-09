@@ -4,22 +4,25 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 public class CustomUserDetails implements UserDetails
 {
     private String email;
     private String password;
     private String salt;
+    private List<GrantedAuthority> roles;
 
-    public CustomUserDetails(String email, String password, String salt) {
+    public CustomUserDetails(String email, String password, String salt, List<GrantedAuthority> roles) {
         this.email = email;
         this.password = password;
         this.salt = salt;
+        this.roles = roles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return roles;
     }
 
     @Override

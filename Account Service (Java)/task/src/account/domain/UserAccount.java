@@ -1,14 +1,22 @@
 package account.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,6 +39,15 @@ public class UserAccount {
     private String salt;
     @OneToMany(mappedBy = "userAccount")
     private List<Employee> employees;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
+    @JoinTable(name = "useraccounts_groups",
+            joinColumns =@JoinColumn(name = "useraccount_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id"
+            ))
+    private List<Group> roles = new ArrayList<>();
 
 
     public Long getId() {
@@ -87,5 +104,28 @@ public class UserAccount {
 
     public void addEmployee(Employee employee) {
         this.employees.add(employee);
+    }
+
+    public List<Group> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Group> roles) {
+        this.roles = roles;
+    }
+    public void addRole(Group group) {
+        roles.add(group);
+    }
+
+    public void removeRole(Group group) {
+        roles.remove(group);
+    }
+
+    public List<String> getRolesAsString() {
+        return roles.stream().map(role -> role.getName().toString()).toList();
+    }
+
+    public List<GrantedAuthority> getGrantedAuthorities() {
+        return roles.stream().map(role -> (GrantedAuthority)new SimpleGrantedAuthority(role.getName())).toList();
     }
 }
