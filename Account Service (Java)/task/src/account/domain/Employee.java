@@ -1,35 +1,38 @@
 package account.domain;
 
+import account.util.DateConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import java.util.UUID;
+import java.util.Date;
 
 @Entity
 @Table(name = "employee", uniqueConstraints = { @UniqueConstraint(columnNames = { "period", "user_account_id" }) })
 public class Employee {
     @Id
     @Column(name = "id", nullable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", sequenceName = "USER_DETAILS_SEQ", allocationSize = 1)
+    private Long id;
     @ManyToOne
     @JoinColumn(name="user_account_id", nullable=false)
     private UserAccount userAccount;
     @Column
-    private String period;
+    @Convert(converter = DateConverter.class)
+    private Date period;
     @Column
-    private Long salary;
+    private Long salaryInCent;
 
-    public Employee()
-    {
-        id = UUID.randomUUID();
-    }
-
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
@@ -41,19 +44,19 @@ public class Employee {
         this.userAccount = userAccount;
     }
 
-    public String getPeriod() {
+    public Date getPeriod() {
         return period;
     }
 
-    public void setPeriod(String period) {
+    public void setPeriod(Date period) {
         this.period = period;
     }
 
-    public Long getSalary() {
-        return salary;
+    public Long getSalaryInCent() {
+        return salaryInCent;
     }
 
-    public void setSalary(Long salary) {
-        this.salary = salary;
+    public void setSalaryInCent(Long salaryInCent) {
+        this.salaryInCent = salaryInCent;
     }
 }

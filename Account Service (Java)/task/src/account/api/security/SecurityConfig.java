@@ -78,6 +78,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/actuator/shutdown").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/acct/payments").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/acct/payments").permitAll()
                                 .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                                 .anyRequest().authenticated()
                         // other matchers

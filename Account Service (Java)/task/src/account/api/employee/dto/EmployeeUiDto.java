@@ -1,18 +1,20 @@
 package account.api.employee.dto;
 
+import account.util.ValidMonthYear;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
-
-import java.util.Date;
+import org.springframework.validation.annotation.Validated;
+@Validated
 public class EmployeeUiDto {
 
-    @NotEmpty
+    @NotEmpty(message = "Employee email cannot be empty!")
     private String employee;
     @JsonFormat(pattern="MM-yyyy")
-    private Date period;
-    @Positive
+    @ValidMonthYear
+    private String period;
+    @Positive(message = "Salary cannot be negative!")
     @JsonProperty(value = "salary")
     private Long salaryInCent;
 
@@ -20,7 +22,7 @@ public class EmployeeUiDto {
         return employee;
     }
 
-    public Date getPeriod() {
+    public String getPeriod() {
         return period;
     }
 

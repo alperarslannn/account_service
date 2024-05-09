@@ -2,19 +2,23 @@ package account.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "user_account")
 public class UserAccount {
     @Id
     @Column(name = "id", nullable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", sequenceName = "USER_DETAILS_SEQ", allocationSize = 1)
+    private Long id;
     @Column
     private String name;
     @Column
@@ -28,12 +32,8 @@ public class UserAccount {
     @OneToMany(mappedBy = "userAccount")
     private List<Employee> employees;
 
-    public UserAccount()
-    {
-        id = UUID.randomUUID();
-    }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 
