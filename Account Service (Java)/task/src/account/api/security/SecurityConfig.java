@@ -51,7 +51,7 @@ public class SecurityConfig {
             if (user.isEmpty()) {
                 throw new UsernameNotFoundException(username);
             }
-            CustomUserDetails customUserDetails = new CustomUserDetails(user.get().getEmail(), user.get().getPassword(), user.get().getSalt(), user.get().getGrantedAuthorities());
+            CustomUserDetails customUserDetails = new CustomUserDetails(user.get().getEmail(), user.get().getPassword(), user.get().getSalt(), user.get().getRoles());
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, customUserDetails.getPassword());
             context.setAuthentication(authentication);
@@ -81,10 +81,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth  // manage access
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/actuator/shutdown").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/acct/payments").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/api/acct/payments").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/admin/user/**").hasRole(Role.ADMINISTRATOR.name())
+                                .requestMatchers(HttpMethod.GET, "/api/empl/payment/**").hasAnyRole(Role.USER.name(), Role.ACCOUNTANT.name())
+                                .requestMatchers(HttpMethod.DELETE, "/api/admin/user/**").hasRole(Role.ADMINISTRATOR.name())
+                                .requestMatchers(HttpMethod.PUT, "/api/admin/user/role/**").hasRole(Role.ADMINISTRATOR.name())
+                                .requestMatchers(HttpMethod.POST, "/api/acct/payments/**").hasRole(Role.ACCOUNTANT.name())
+                                .requestMatchers(HttpMethod.PUT, "/api/acct/payments/**").hasRole(Role.ACCOUNTANT.name())
                                 .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
-                                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/user/**")).hasAuthority(Roles.ROLE_ADMINISTRATOR.toString())
+                                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/user/**")).hasRole(Role.ADMINISTRATOR.name())
                                 .anyRequest().authenticated()
                         // other matchers
                 )

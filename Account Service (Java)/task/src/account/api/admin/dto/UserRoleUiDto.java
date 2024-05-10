@@ -1,6 +1,6 @@
 package account.api.admin.dto;
 
-import account.api.security.Roles;
+import account.api.security.Role;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 
@@ -9,7 +9,7 @@ public class UserRoleUiDto {
     @NotNull
     private String user;
     @NotNull
-    private Roles role;
+    private Role role;
     @NotNull
     private OperationType operation;
 
@@ -21,7 +21,7 @@ public class UserRoleUiDto {
         return user;
     }
 
-    public Roles getRole() {
+    public Role getRole() {
         return role;
     }
 

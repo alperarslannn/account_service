@@ -1,5 +1,6 @@
 package account.domain;
 
+import account.api.security.Role;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -47,7 +49,7 @@ public class UserAccount {
             joinColumns =@JoinColumn(name = "useraccount_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id"
             ))
-    private List<Group> roles = new ArrayList<>();
+    private List<Group> authorities = new ArrayList<>();
 
 
     public Long getId() {
@@ -106,26 +108,30 @@ public class UserAccount {
         this.employees.add(employee);
     }
 
-    public List<Group> getRoles() {
-        return roles;
+    public List<Role> getRoles() {
+        return authorities.stream().map(authority -> Role.findRoleByAuthorityName(authority.getAuthority())).toList();
     }
 
-    public void setRoles(List<Group> roles) {
-        this.roles = roles;
+    public List<Group> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(List<Group> authorities) {
+        this.authorities = authorities;
     }
     public void addRole(Group group) {
-        roles.add(group);
+        authorities.add(group);
     }
 
     public void removeRole(Group group) {
-        roles.remove(group);
+        authorities.remove(group);
     }
 
     public List<String> getRolesAsString() {
-        return roles.stream().map(role -> role.getName().toString()).toList();
+        return authorities.stream().sorted(Comparator.comparingLong(Group::getId)).map(Group::getAuthority).sorted().toList();
     }
 
     public List<GrantedAuthority> getGrantedAuthorities() {
-        return roles.stream().map(role -> (GrantedAuthority)new SimpleGrantedAuthority(role.getName())).toList();
+        return authorities.stream().map(role -> (GrantedAuthority)new SimpleGrantedAuthority("ROLE_"+role.getAuthority())).toList();
     }
 }

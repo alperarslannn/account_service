@@ -1,6 +1,6 @@
 package account.bootstrap;
 
-import account.api.security.Roles;
+import account.api.security.Role;
 import account.domain.Group;
 import account.domain.repositories.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +25,10 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void createRoles() {
-        if(Objects.isNull(groupRepository.findByName(Roles.ROLE_ADMINISTRATOR.name()))){
-            groupRepository.save(new Group(Roles.ROLE_ADMINISTRATOR.name()));
-            groupRepository.save(new Group(Roles.ROLE_USER.name()));
-            groupRepository.save(new Group(Roles.ROLE_ACCOUNTANT.name()));
+        if(Objects.isNull(groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.ADMINISTRATOR)))){
+            groupRepository.save(new Group(Role.ADMINISTRATOR.name()));
+            groupRepository.save(new Group(Role.ACCOUNTANT.name()));
+            groupRepository.save(new Group(Role.USER.name()));
         }
     }
 }

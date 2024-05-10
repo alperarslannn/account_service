@@ -11,10 +11,8 @@ public interface UserAccountRepository extends CrudRepository<UserAccount, Long>
     @Override
     Optional<UserAccount> findById(Long id);
     Iterable<UserAccount> findAllByOrderByIdAsc();
-    Optional<UserAccount> findFirstByRoles(Group role);
-
+    Optional<UserAccount> findFirstByAuthorities(Group role);
     Optional<UserAccount> findByEmailEqualsIgnoreCase(String email);
-
     void deleteUserAccountByEmail(String email);
 
 }

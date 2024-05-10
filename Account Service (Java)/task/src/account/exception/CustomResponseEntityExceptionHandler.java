@@ -1,10 +1,12 @@
 package account.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,7 +19,7 @@ import java.time.LocalDateTime;
 public class CustomResponseEntityExceptionHandler {
 
     @ExceptionHandler({ BaseException.class })
-    public ResponseEntity<RestError> handleUserExistException(BaseException ex, HttpServletRequest request) {
+    public ResponseEntity<RestError> handleBaseException(BaseException ex, HttpServletRequest request) {
         ResponseStatus responseStatusAnnotation = ex.getClass().getAnnotation(ResponseStatus.class);
         RestError re = new RestError(ex.getTimestamp(), responseStatusAnnotation.code().value(),
                 responseStatusAnnotation.code().getReasonPhrase(), responseStatusAnnotation.reason(), request.getServletPath());
@@ -45,5 +47,16 @@ public class CustomResponseEntityExceptionHandler {
         RestError re = new RestError(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage(), request.getServletPath());
         return new ResponseEntity<>(re, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class})
+    public ResponseEntity<RestError> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request, HttpServletResponse response) {
+        if(ex.getMessage().contains("Role")){
+            return handleBaseException(new RoleNotFoundException(), request);
+        } else {
+            RestError re = new RestError(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
+                    HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage(), request.getServletPath());
+            return new ResponseEntity<>(re, HttpStatus.BAD_REQUEST);
+        }
     }
 }

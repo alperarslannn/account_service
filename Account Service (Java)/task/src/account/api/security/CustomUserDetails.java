@@ -1,19 +1,21 @@
 package account.api.security;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails
 {
     private String email;
     private String password;
     private String salt;
-    private List<GrantedAuthority> roles;
+    private List<Role> roles;
 
-    public CustomUserDetails(String email, String password, String salt, List<GrantedAuthority> roles) {
+    public CustomUserDetails(String email, String password, String salt, List<Role> roles) {
         this.email = email;
         this.password = password;
         this.salt = salt;
@@ -22,7 +24,7 @@ public class CustomUserDetails implements UserDetails
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return roles.stream().map(role -> (GrantedAuthority)new SimpleGrantedAuthority("ROLE_"+ role.name())).collect(Collectors.toList());
     }
 
     @Override

@@ -19,32 +19,32 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_seq")
     @SequenceGenerator(name = "group_seq", sequenceName = "GROUP_SEQ", allocationSize = 1)
     private Long id;
-    @Column
-    private String name;
-    @ManyToMany(mappedBy = "roles")
+    @Column(unique = true)
+    private String authority;
+    @ManyToMany(mappedBy = "authorities")
     private List<UserAccount> userAccounts;
 
     protected Group() {
     }
 
-    public Group(String name) {
-        this.name = name;
+    public Group(String role) {
+        this.authority = "ROLE_" + role;
     }
 
     public Long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getAuthority() {
+        return authority;
     }
 
-    public void setName(String name) {
+    public void setAuthority(String authority) {
 
-        this.name = name;
+        this.authority = authority;
     }
     public void findRoleByEnum(String name) {
-        this.name = name;
+        this.authority = name;
     }
 
 }

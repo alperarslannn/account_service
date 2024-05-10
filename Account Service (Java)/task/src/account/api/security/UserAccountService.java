@@ -11,6 +11,7 @@ import account.domain.UserAccount;
 import account.domain.repositories.GroupRepository;
 import account.domain.repositories.UserAccountRepository;
 import account.exception.AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException;
+import account.exception.AdministrativeAndBusinessRolesCannotBeCombinedException;
 import account.exception.NewPasswordMustBeDifferentException;
 import account.exception.PasswordBreachedException;
 import account.exception.RoleNotFoundException;
@@ -76,12 +77,12 @@ public class UserAccountService {
         userAccount.setSalt(salt);
 
         List<Group> roles = new ArrayList<>();
-        if (userAccountRepository.findFirstByRoles(groupRepository.findByName(Roles.ROLE_ADMINISTRATOR.toString())).isPresent()) {
-            roles.add(groupRepository.findByName(Roles.ROLE_USER.toString()));
+        if (userAccountRepository.findFirstByAuthorities(groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.ADMINISTRATOR))).isPresent()) {
+            roles.add(groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.USER)));
         } else {
-            roles.add(groupRepository.findByName(Roles.ROLE_ADMINISTRATOR.toString()));
+            roles.add(groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.ADMINISTRATOR)));
         }
-        userAccount.setRoles(roles);
+        userAccount.setAuthorities(roles);
         UserAccount savedUserAccount = userAccountRepository.save(userAccount);
 
         return new UserUiDto(savedUserAccount.getId(), savedUserAccount.getName(),
@@ -151,33 +152,33 @@ public class UserAccountService {
     @Transactional
     public UserUiDto setUserAccountRoles(UserRoleUiDto userRoleUiDto) {
         UserAccount userAccount = userAccountRepository.findByEmailEqualsIgnoreCase(userRoleUiDto.getUser()).orElseThrow(UserNotFoundException::new);
-        Group requiredRole = groupRepository.findByName(userRoleUiDto.getRole().toString());
-        Group administratorRole = groupRepository.findByName(Roles.ROLE_ADMINISTRATOR.name());
-        Group userRole = groupRepository.findByName(Roles.ROLE_USER.name());
-        Group accountantRole = groupRepository.findByName(Roles.ROLE_ACCOUNTANT.name());
+        Group requiredAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(userRoleUiDto.getRole()));
+        Group administratorAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.ADMINISTRATOR));
+        Group userAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.USER));
+        Group accountantAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.ACCOUNTANT));
 
-        //todo fix business exceptions
-        if(Objects.isNull(requiredRole)) throw new RoleNotFoundException();
-        if (!userAccount.getRoles().contains(requiredRole)){
+        //todo fix ugly code
+        if(Objects.isNull(requiredAuthority)) throw new RoleNotFoundException();
+        if (!userAccount.getAuthorities().contains(requiredAuthority) && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
             throw new UserDoesNotHaveRoleException();
+        }
+        if (userRoleUiDto.getRole().equals(Role.ADMINISTRATOR) && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
+            throw new AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException();
         }
         if (userAccount.getRoles().size() == 1 && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
             throw new UserHasOnlyOneRoleException();
         }
-        if (userRoleUiDto.getRole().equals(Roles.ROLE_ADMINISTRATOR) && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
-            throw new AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException();
-        }
         if(userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
-            if ((userRoleUiDto.getRole().equals(Roles.ROLE_ADMINISTRATOR) && (userAccount.getRoles().contains(userRole) || userAccount.getRoles().contains(accountantRole)))
-                    || ((userRoleUiDto.getRole().equals(Roles.ROLE_USER) || userRoleUiDto.getRole().equals(Roles.ROLE_ACCOUNTANT)) && userAccount.getRoles().contains(administratorRole))){
-                throw new AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException();
+            if ((userRoleUiDto.getRole().equals(Role.ADMINISTRATOR) && (userAccount.getAuthorities().contains(userAuthority) || userAccount.getAuthorities().contains(accountantAuthority)))
+                    || ((userRoleUiDto.getRole().equals(Role.USER) || userRoleUiDto.getRole().equals(Role.ACCOUNTANT)) && userAccount.getAuthorities().contains(administratorAuthority))){
+                throw new AdministrativeAndBusinessRolesCannotBeCombinedException();
             }
         }
 
         if (userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
-            userAccount.addRole(requiredRole);
+            userAccount.addRole(requiredAuthority);
         } else {
-            userAccount.removeRole(requiredRole);
+            userAccount.removeRole(requiredAuthority);
         }
         userAccountRepository.save(userAccount);
         return new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString());
