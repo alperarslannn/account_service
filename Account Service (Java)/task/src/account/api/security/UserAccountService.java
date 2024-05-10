@@ -153,11 +153,7 @@ public class UserAccountService {
     public UserUiDto setUserAccountRoles(UserRoleUiDto userRoleUiDto) {
         UserAccount userAccount = userAccountRepository.findByEmailEqualsIgnoreCase(userRoleUiDto.getUser()).orElseThrow(UserNotFoundException::new);
         Group requiredAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(userRoleUiDto.getRole()));
-        Group administratorAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.ADMINISTRATOR));
-        Group userAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.USER));
-        Group accountantAuthority = groupRepository.findByAuthority(Role.getAuthorityNameByRole(Role.ACCOUNTANT));
 
-        //todo fix ugly code
         if(Objects.isNull(requiredAuthority)) throw new RoleNotFoundException();
         if (!userAccount.getAuthorities().contains(requiredAuthority) && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
             throw new UserDoesNotHaveRoleException();
@@ -168,12 +164,7 @@ public class UserAccountService {
         if (userAccount.getRoles().size() == 1 && userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.REMOVE)){
             throw new UserHasOnlyOneRoleException();
         }
-        if(userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
-            if ((userRoleUiDto.getRole().equals(Role.ADMINISTRATOR) && (userAccount.getAuthorities().contains(userAuthority) || userAccount.getAuthorities().contains(accountantAuthority)))
-                    || ((userRoleUiDto.getRole().equals(Role.USER) || userRoleUiDto.getRole().equals(Role.ACCOUNTANT)) && userAccount.getAuthorities().contains(administratorAuthority))){
-                throw new AdministrativeAndBusinessRolesCannotBeCombinedException();
-            }
-        }
+        administrativeAndBusinessRolesCannotBeMixedCheck(userRoleUiDto, userAccount);
 
         if (userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
             userAccount.addRole(requiredAuthority);
@@ -182,5 +173,14 @@ public class UserAccountService {
         }
         userAccountRepository.save(userAccount);
         return new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString());
+    }
+
+    private static void administrativeAndBusinessRolesCannotBeMixedCheck(UserRoleUiDto userRoleUiDto, UserAccount userAccount) {
+        if(userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
+            if ((userRoleUiDto.getRole().equals(Role.ADMINISTRATOR) && (Role.getBusinessRoles().stream().anyMatch(role -> userAccount.getRoles().contains(role))))
+                    || (Role.getBusinessRoles().stream().anyMatch(role -> userRoleUiDto.getRole().equals(role)) && userAccount.getRoles().contains(Role.ADMINISTRATOR))){
+                throw new AdministrativeAndBusinessRolesCannotBeCombinedException();
+            }
+        }
     }
 }

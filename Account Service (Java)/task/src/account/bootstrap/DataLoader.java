@@ -29,6 +29,7 @@ public class DataLoader implements CommandLineRunner {
             groupRepository.save(new Group(Role.ADMINISTRATOR.name()));
             groupRepository.save(new Group(Role.ACCOUNTANT.name()));
             groupRepository.save(new Group(Role.USER.name()));
+            groupRepository.save(new Group(Role.AUDITOR.name()));
         }
     }
 }
