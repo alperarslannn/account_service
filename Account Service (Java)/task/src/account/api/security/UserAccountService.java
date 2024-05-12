@@ -199,4 +199,21 @@ public class UserAccountService {
         userAccountRepository.save(userAccount);
         return new SuccessUiDto("User " + userLockUiDto.getUser() + " " + userLockUiDto.lockingString() + "!", userAccount.getEmail(), userAccount.getId());
     }
+
+    @Transactional
+    public void saveUser(UserAccount userAccount) {
+        userAccountRepository.save(userAccount);
+    }
+
+    @Transactional
+    public void increaseFailedAttempCount(UserAccount userAccount) {
+        userAccount.setFailedAttempt(userAccount.getFailedAttempt() + 1);
+        userAccountRepository.save(userAccount);
+    }
+
+    @Transactional
+    public void resetFailedAttempCount(UserAccount userAccount) {
+        userAccount.setFailedAttempt(0);
+        userAccountRepository.save(userAccount);
+    }
 }

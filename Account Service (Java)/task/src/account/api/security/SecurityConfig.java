@@ -81,6 +81,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions().disable()) // For the H2 console
                 .authorizeHttpRequests(auth -> auth  // manage access
                                 .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/actuator/shutdown").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/changepass").hasAnyRole(Role.ADMINISTRATOR.name(), Role.USER.name(), Role.ACCOUNTANT.name())
                                 .requestMatchers(HttpMethod.GET, "/api/empl/payment/**").hasAnyRole(Role.USER.name(), Role.ACCOUNTANT.name())
                                 .requestMatchers(HttpMethod.GET, "/api/admin/user/**").hasRole(Role.ADMINISTRATOR.name())

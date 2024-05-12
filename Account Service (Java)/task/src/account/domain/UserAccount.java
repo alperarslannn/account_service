@@ -41,6 +41,8 @@ public class UserAccount {
     private String salt;
     @Column
     private boolean locked = false;
+    @Column
+    private int failedAttempt = 0;
     @OneToMany(mappedBy = "userAccount")
     private List<Employee> employees;
     @ManyToMany(fetch = FetchType.EAGER, cascade = {
@@ -103,6 +105,14 @@ public class UserAccount {
 
     public void setLocked(boolean locked) {
         this.locked = locked;
+    }
+
+    public int getFailedAttempt() {
+        return failedAttempt;
+    }
+
+    public void setFailedAttempt(int failedAttempt) {
+        this.failedAttempt = failedAttempt;
     }
 
     public List<Employee> getEmployees() {
