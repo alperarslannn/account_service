@@ -39,6 +39,8 @@ public class UserAccount {
     private String password;
     @Column
     private String salt;
+    @Column
+    private boolean locked = false;
     @OneToMany(mappedBy = "userAccount")
     private List<Employee> employees;
     @ManyToMany(fetch = FetchType.EAGER, cascade = {
@@ -50,7 +52,6 @@ public class UserAccount {
             inverseJoinColumns = @JoinColumn(name = "group_id"
             ))
     private List<Group> authorities = new ArrayList<>();
-
 
     public Long getId() {
         return id;
@@ -94,6 +95,14 @@ public class UserAccount {
 
     public void setSalt(String salt) {
         this.salt = salt;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
     public List<Employee> getEmployees() {

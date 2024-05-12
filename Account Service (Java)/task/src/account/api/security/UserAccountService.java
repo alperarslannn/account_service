@@ -1,6 +1,7 @@
 package account.api.security;
 
 import account.AccountServiceApplication;
+import account.api.admin.dto.UserLockUiDto;
 import account.api.admin.dto.UserRoleUiDto;
 import account.api.security.dto.NewPasswordUiDto;
 import account.api.security.dto.PasswordUpdatedUiDto;
@@ -10,6 +11,7 @@ import account.domain.Group;
 import account.domain.UserAccount;
 import account.domain.repositories.GroupRepository;
 import account.domain.repositories.UserAccountRepository;
+import account.exception.AdminCannotBeLockedException;
 import account.exception.AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException;
 import account.exception.AdministrativeAndBusinessRolesCannotBeCombinedException;
 import account.exception.NewPasswordMustBeDifferentException;
@@ -53,7 +55,7 @@ public class UserAccountService {
         return userUiDtoList;
     }
 
-
+    @Transactional
     public UserUiDto addUser(SignupUiDto signupUiDto){
 
         String salt = BCrypt.gensalt();
@@ -89,6 +91,7 @@ public class UserAccountService {
                 savedUserAccount.getLastname(), savedUserAccount.getEmail(), savedUserAccount.getRolesAsString());
     }
 
+    @Transactional
     public PasswordUpdatedUiDto updatePassword(NewPasswordUiDto newPasswordUiDto, Authentication authentication){
         UserAccount userAccount = userAccountRepository.findByEmailEqualsIgnoreCase(((CustomUserDetails) authentication.getPrincipal()).getUsername()).orElseThrow(() -> new IllegalStateException("User not found!"));
         if(checkNewPasswordIsTheSame(newPasswordUiDto.getNew_password(), userAccount.getPassword())){
@@ -175,12 +178,22 @@ public class UserAccountService {
         return new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString());
     }
 
-    private static void administrativeAndBusinessRolesCannotBeMixedCheck(UserRoleUiDto userRoleUiDto, UserAccount userAccount) {
+    private void administrativeAndBusinessRolesCannotBeMixedCheck(UserRoleUiDto userRoleUiDto, UserAccount userAccount) {
         if(userRoleUiDto.getOperation().equals(UserRoleUiDto.OperationType.GRANT)){
             if ((userRoleUiDto.getRole().equals(Role.ADMINISTRATOR) && (Role.getBusinessRoles().stream().anyMatch(role -> userAccount.getRoles().contains(role))))
                     || (Role.getBusinessRoles().stream().anyMatch(role -> userRoleUiDto.getRole().equals(role)) && userAccount.getRoles().contains(Role.ADMINISTRATOR))){
                 throw new AdministrativeAndBusinessRolesCannotBeCombinedException();
             }
         }
+    }
+
+    @Transactional
+    public void accountLocking(UserLockUiDto userLockUiDto) {
+        UserAccount userAccount = userAccountRepository.findByEmailEqualsIgnoreCase(userLockUiDto.getUser()).orElseThrow(UserNotFoundException::new);
+        if(userAccount.getRoles().contains(Role.ADMINISTRATOR) && userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK)){
+            throw new AdminCannotBeLockedException();
+        }
+        userAccount.setLocked(userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK));
+        userAccountRepository.save(userAccount);
     }
 }

@@ -1,5 +1,6 @@
 package account.api.admin;
 
+import account.api.admin.dto.UserLockUiDto;
 import account.api.admin.dto.UserRoleUiDto;
 import account.api.employee.dto.SuccessUiDto;
 import account.api.security.UserAccountService;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +42,12 @@ public class AdminUiController {
     public ResponseEntity<SuccessUiDto> deleteUserAccount(Authentication authentication, @PathVariable String email){
         userAccountService.deleteUserAccount(email, authentication);
         return ResponseEntity.ok(new SuccessUiDto("Deleted successfully!", email));
+    }
+
+    @PostMapping(value="/access")
+    public ResponseEntity<SuccessUiDto> userAccountLockSwitch(@RequestBody UserLockUiDto userLockUiDto){
+        userAccountService.accountLocking(userLockUiDto);
+        return ResponseEntity.ok(new SuccessUiDto("User " + userLockUiDto.getUser() + " " + userLockUiDto.lockingString() + "!"));
     }
 
 

@@ -1,10 +1,12 @@
 package account.api.security;
 
+import account.api.SecurityEventResponseEntity;
 import account.api.security.dto.NewPasswordUiDto;
 import account.api.security.dto.PasswordUpdatedUiDto;
 import account.api.security.dto.SignupUiDto;
 import account.api.security.dto.UserUiDto;
 import account.domain.UserAccount;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -31,7 +33,13 @@ public class AuthUiController {
     @GetMapping(value="/signin")
     public ResponseEntity<UserUiDto> signin(Authentication authentication){
         UserAccount userAccount = userAccountService.findByUsername(((CustomUserDetails) authentication.getPrincipal()).getUsername());
-        return ResponseEntity.ok(new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString()));
+        return new SecurityEventResponseEntity.Builder<>(new UserUiDto(userAccount.getId(), userAccount.getName(), userAccount.getLastname(), userAccount.getEmail(), userAccount.getRolesAsString()), HttpStatus.OK)
+                .eventName(null)
+                .path(null)
+                .date(null)
+                .subjectAccountId(null)
+                .subjectAccountName(null)
+                .build();
     }
 
     @PostMapping(value="/changepass")

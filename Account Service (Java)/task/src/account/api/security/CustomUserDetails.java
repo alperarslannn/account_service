@@ -13,12 +13,14 @@ public class CustomUserDetails implements UserDetails
     private String email;
     private String password;
     private String salt;
+    private boolean lock;
     private List<Role> roles;
 
-    public CustomUserDetails(String email, String password, String salt, List<Role> roles) {
+    public CustomUserDetails(String email, String password, String salt, boolean lock, List<Role> roles) {
         this.email = email;
         this.password = password;
         this.salt = salt;
+        this.lock = lock;
         this.roles = roles;
     }
 
@@ -48,7 +50,7 @@ public class CustomUserDetails implements UserDetails
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !lock;
     }
 
     @Override
