@@ -3,6 +3,7 @@ package account.api.security;
 import account.AccountServiceApplication;
 import account.api.admin.dto.UserLockUiDto;
 import account.api.admin.dto.UserRoleUiDto;
+import account.api.employee.dto.SuccessUiDto;
 import account.api.security.dto.NewPasswordUiDto;
 import account.api.security.dto.PasswordUpdatedUiDto;
 import account.api.security.dto.SignupUiDto;
@@ -144,12 +145,13 @@ public class UserAccountService {
     }
 
     @Transactional
-    public void deleteUserAccount(String email, Authentication authentication) {
-        findByUsername(email);
+    public SuccessUiDto deleteUserAccount(String email, Authentication authentication) {
+        UserAccount userAccount = findByUsername(email);
         if(((CustomUserDetails) authentication.getPrincipal()).getUsername().equals(email)){
             throw new AdminCannotDeleteThemselfOrAdminRoleCannotBeRemovedException();
         }
         userAccountRepository.deleteUserAccountByEmail(email);
+        return new SuccessUiDto("Deleted successfully!", userAccount.getEmail(), userAccount.getId());
     }
 
     @Transactional
@@ -188,12 +190,13 @@ public class UserAccountService {
     }
 
     @Transactional
-    public void accountLocking(UserLockUiDto userLockUiDto) {
+    public SuccessUiDto accountLocking(UserLockUiDto userLockUiDto) {
         UserAccount userAccount = userAccountRepository.findByEmailEqualsIgnoreCase(userLockUiDto.getUser()).orElseThrow(UserNotFoundException::new);
         if(userAccount.getRoles().contains(Role.ADMINISTRATOR) && userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK)){
             throw new AdminCannotBeLockedException();
         }
         userAccount.setLocked(userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK));
         userAccountRepository.save(userAccount);
+        return new SuccessUiDto("User " + userLockUiDto.getUser() + " " + userLockUiDto.lockingString() + "!", userAccount.getEmail(), userAccount.getId());
     }
 }

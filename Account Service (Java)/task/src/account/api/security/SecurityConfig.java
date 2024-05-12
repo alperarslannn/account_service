@@ -51,7 +51,7 @@ public class SecurityConfig {
             if (user.isEmpty()) {
                 throw new UsernameNotFoundException(username);
             }
-            CustomUserDetails customUserDetails = new CustomUserDetails(user.get().getEmail(), user.get().getPassword(), user.get().getSalt(), user.get().isLocked(),user.get().getRoles());
+            CustomUserDetails customUserDetails = new CustomUserDetails(user.get().getId(), user.get().getEmail(), user.get().getPassword(), user.get().getSalt(), user.get().isLocked(),user.get().getRoles());
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetails, customUserDetails.getPassword());
             context.setAuthentication(authentication);

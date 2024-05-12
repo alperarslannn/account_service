@@ -1,8 +1,10 @@
 package account.api;
 
+import account.api.security.CustomUserDetails;
 import account.api.security.event.SecurityEventType;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Date;
 
@@ -12,10 +14,8 @@ public class SecurityEventResponseEntity<T> extends ResponseEntity<T> {
     private Date date;
     private Long subjectAccountId;
     private Long objectAccountId;
-    private String subjectAccountName;
-    private String objectAccountName;
+    private String object;
 
-    //todo use this in everywhere
     public SecurityEventResponseEntity(T body, HttpStatusCode status) {
         super(body, status);
     }
@@ -60,20 +60,12 @@ public class SecurityEventResponseEntity<T> extends ResponseEntity<T> {
         this.objectAccountId = objectAccountId;
     }
 
-    public String getSubjectAccountName() {
-        return subjectAccountName;
+    public String getObject() {
+        return object;
     }
 
-    public void setSubjectAccountName(String subjectAccountName) {
-        this.subjectAccountName = subjectAccountName;
-    }
-
-    public String getObjectAccountName() {
-        return objectAccountName;
-    }
-
-    public void setObjectAccountName(String objectAccountName) {
-        this.objectAccountName = objectAccountName;
+    public void setObject(String object) {
+        this.object = object;
     }
 
     public static class Builder<T> {
@@ -82,10 +74,8 @@ public class SecurityEventResponseEntity<T> extends ResponseEntity<T> {
         private SecurityEventType eventName;
         private String path;
         private Date date;
-        private Long subjectAccountId;
         private Long objectAccountId;
-        private String subjectAccountName;
-        private String objectAccountName;
+        private String object;
 
         public Builder(T body, HttpStatusCode status) {
             this.body = body;
@@ -107,36 +97,25 @@ public class SecurityEventResponseEntity<T> extends ResponseEntity<T> {
             return this;
         }
 
-        public Builder<T> subjectAccountId(Long subjectAccountId) {
-            this.subjectAccountId = subjectAccountId;
-            return this;
-        }
-
         public Builder<T> objectAccountId(Long objectAccountId) {
             this.objectAccountId = objectAccountId;
             return this;
         }
 
-        public Builder<T> subjectAccountName(String subjectAccountName) {
-            this.subjectAccountName = subjectAccountName;
-            return this;
-        }
-
-        public Builder<T> objectAccountName(String objectAccountName) {
-            this.objectAccountName = objectAccountName;
+        public Builder<T> object(String object) {
+            this.object = object;
             return this;
         }
 
         public SecurityEventResponseEntity<T> build() {
-            SecurityEventResponseEntity<T> customResponseEntity = new SecurityEventResponseEntity<>(body, status);
-            customResponseEntity.setEventName(eventName);
-            customResponseEntity.setPath(path);
-            customResponseEntity.setDate(date);
-            customResponseEntity.setSubjectAccountId(subjectAccountId);
-            customResponseEntity.setObjectAccountId(objectAccountId);
-            customResponseEntity.setSubjectAccountName(subjectAccountName);
-            customResponseEntity.setObjectAccountName(objectAccountName);
-            return customResponseEntity;
+            SecurityEventResponseEntity<T> securityEventResponseEntity = new SecurityEventResponseEntity<>(body, status);
+            securityEventResponseEntity.setEventName(eventName);
+            securityEventResponseEntity.setPath(path);
+            securityEventResponseEntity.setDate(date);
+            securityEventResponseEntity.setSubjectAccountId(SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser") ? 0L:((CustomUserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
+            securityEventResponseEntity.setObjectAccountId(objectAccountId);
+            securityEventResponseEntity.setObject(object);
+            return securityEventResponseEntity;
         }
     }
 }

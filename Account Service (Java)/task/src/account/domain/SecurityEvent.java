@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 import java.util.Date;
 
@@ -33,10 +32,8 @@ public class SecurityEvent {
     private Long subjectAccountId;
     @Column
     private Long objectAccountId;
-    @Transient
-    private String subjectAccountName;
-    @Transient
-    private String objectAccountName;
+    @Column
+    private String object;
 
     public Long getId() {
         return id;
@@ -82,19 +79,11 @@ public class SecurityEvent {
         this.objectAccountId = objectAccountId;
     }
 
-    public String getSubjectAccountName() {
-        return subjectAccountName;
+    public String getObject() {
+        return object;
     }
 
-    public void setSubjectAccountName(String subjectAccountName) {
-        this.subjectAccountName = subjectAccountName;
-    }
-
-    public String getObjectAccountName() {
-        return objectAccountName;
-    }
-
-    public void setObjectAccountName(String objectAccountName) {
-        this.objectAccountName = objectAccountName;
+    public void setObject(String object) {
+        this.object = object;
     }
 }

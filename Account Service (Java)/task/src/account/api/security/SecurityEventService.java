@@ -27,12 +27,11 @@ public class SecurityEventService {
         return securityEventList.stream()
                 .map(securityEvent -> {
                    UserAccount subjectUserAccount = userAccountRepository.findById(securityEvent.getSubjectAccountId()).orElse(null);
-                   UserAccount objectUserAccount = userAccountRepository.findById(securityEvent.getObjectAccountId()).orElse(null);
                    return new SecurityEventUiDto(
                         securityEvent.getDate(),
                         securityEvent.getEventName().name(),
-                        subjectUserAccount != null ? subjectUserAccount.getName():"anonymous",
-                        objectUserAccount != null ? objectUserAccount.getName():"anonymous",
+                        subjectUserAccount != null ? subjectUserAccount.getEmail():"Anonymous",
+                        securityEvent.getObject(),
                         securityEvent.getPath());
                 }).toList();
 

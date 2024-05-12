@@ -11,15 +11,13 @@ import java.util.List;
 @RestController
 @RequestMapping(value="/api/security")
 public class SecurityEventUiController {
-    private final UserAccountService userAccountService;
     private final SecurityEventService securityEventService;
 
-    public SecurityEventUiController(UserAccountService userAccountService, SecurityEventService securityEventService) {
-        this.userAccountService = userAccountService;
+    public SecurityEventUiController(SecurityEventService securityEventService) {
         this.securityEventService = securityEventService;
     }
 
-    @GetMapping(value="/events")
+    @GetMapping(value="/events/")
     public ResponseEntity<List<SecurityEventUiDto>> getSecurityEvents(){
         return ResponseEntity.ok(securityEventService.findAllSecurityEvents());
     }

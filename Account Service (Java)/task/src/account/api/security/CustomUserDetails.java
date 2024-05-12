@@ -10,13 +10,15 @@ import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails
 {
+    private Long id;
     private String email;
     private String password;
     private String salt;
     private boolean lock;
     private List<Role> roles;
 
-    public CustomUserDetails(String email, String password, String salt, boolean lock, List<Role> roles) {
+    public CustomUserDetails(Long id, String email, String password, String salt, boolean lock, List<Role> roles) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.salt = salt;
@@ -61,5 +63,9 @@ public class CustomUserDetails implements UserDetails
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
