@@ -47,12 +47,13 @@ public class AdminUiController {
     @LogSecurityEvent
     public ResponseEntity<UserUiDto> changeUserRole(@RequestBody UserRoleUiDto userRoleUiDto){
         UserUiDto userUiDto = userAccountService.setUserAccountRoles(userRoleUiDto);
+        String toOrFrom = userRoleUiDto.getOperation().name().equals(UserRoleUiDto.OperationType.GRANT.name()) ? "to":"from";
         return new SecurityEventResponseEntity.Builder<>(userUiDto, HttpStatus.OK)
                 .eventName(userRoleUiDto.getOperation().name().equals(UserRoleUiDto.OperationType.GRANT.name()) ? GRANT_ROLE:REMOVE_ROLE)
                 .path("/api/admin/user/role")
                 .date(Date.from(Instant.now()))
                 .objectAccountId(userUiDto.getId())
-                .object(userRoleUiDto.getOperation().name().substring(0, 1).toUpperCase() + userRoleUiDto.getOperation().name().substring(1).toLowerCase() + " role " + userRoleUiDto.getRole() + " to " + userUiDto.getEmail())
+                .object(userRoleUiDto.getOperation().name().substring(0, 1).toUpperCase() + userRoleUiDto.getOperation().name().substring(1).toLowerCase() + " role " + userRoleUiDto.getRole() + " " + toOrFrom + " " + userUiDto.getEmail())
                 .build();
     }
 

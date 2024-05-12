@@ -1,6 +1,7 @@
 package account.api.security;
 
 import account.api.security.dto.SecurityEventUiDto;
+import account.api.security.event.SecurityEventType;
 import account.domain.SecurityEvent;
 import account.domain.UserAccount;
 import account.domain.repositories.SecurityEventRepository;
@@ -27,12 +28,21 @@ public class SecurityEventService {
         return securityEventList.stream()
                 .map(securityEvent -> {
                    UserAccount subjectUserAccount = userAccountRepository.findById(securityEvent.getSubjectAccountId()).orElse(null);
-                   return new SecurityEventUiDto(
-                        securityEvent.getDate(),
-                        securityEvent.getEventName().name(),
-                        subjectUserAccount != null ? subjectUserAccount.getEmail():"Anonymous",
-                        securityEvent.getObject(),
-                        securityEvent.getPath());
+                   if(securityEvent.getEventName().equals(SecurityEventType.LOGIN_FAILED)){
+                       return new SecurityEventUiDto(
+                               securityEvent.getDate(),
+                               securityEvent.getEventName().name(),
+                               securityEvent.getObject(),
+                               securityEvent.getPath(),
+                               securityEvent.getPath());
+                   } else {
+                       return new SecurityEventUiDto(
+                            securityEvent.getDate(),
+                            securityEvent.getEventName().name(),
+                            subjectUserAccount != null ? subjectUserAccount.getEmail():"Anonymous",
+                            securityEvent.getObject(),
+                            securityEvent.getPath());
+                   }
                 }).toList();
 
     }
