@@ -46,6 +46,7 @@ node/
 .gradle
 **/build/
 !src/**/build/
+**/task/out/**
 
 # Ignore Gradle GUI config
 gradle-app.setting
