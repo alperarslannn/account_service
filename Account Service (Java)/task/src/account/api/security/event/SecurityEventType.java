@@ -10,7 +10,6 @@ public enum SecurityEventType {
     LOCK_USER("The Administrator has locked the user", "LOCK_USER"),
     UNLOCK_USER("The Administrator has unlocked a user", "UNLOCK_USER"),
     DELETE_USER("The Administrator has deleted a user", "DELETE_USER"),
-    //todo
     BRUTE_FORCE("A user has been blocked on suspicion of a brute force attack", "BRUTE_FORCE");
 
 
