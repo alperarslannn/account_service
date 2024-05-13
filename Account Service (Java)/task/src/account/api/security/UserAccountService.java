@@ -195,9 +195,26 @@ public class UserAccountService {
         if(userAccount.getRoles().contains(Role.ADMINISTRATOR) && userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK)){
             throw new AdminCannotBeLockedException();
         }
+        if(userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.UNLOCK)){
+            userAccount.setFailedAttempt(0);
+        }
         userAccount.setLocked(userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK));
         userAccountRepository.save(userAccount);
         return new SuccessUiDto("User " + userLockUiDto.getUser() + " " + userLockUiDto.lockingString() + "!", userAccount.getEmail(), userAccount.getId());
+    }
+
+    @Transactional
+    public SuccessUiDto updateAccountLocking(UserLockUiDto userLockUiDto) {
+        UserAccount userAccount = userAccountRepository.findByEmailEqualsIgnoreCase(userLockUiDto.getUser()).orElseThrow(UserNotFoundException::new);
+        if(userAccount.getRoles().contains(Role.ADMINISTRATOR) && userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK)){
+            throw new AdminCannotBeLockedException();
+        }
+        if(userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.UNLOCK)){
+            userAccount.setFailedAttempt(0);
+        }
+        userAccount.setLocked(userLockUiDto.getOperation().equals(UserLockUiDto.OperationType.LOCK));
+        userAccountRepository.save(userAccount);
+        return new SuccessUiDto("User " + userLockUiDto.getUser().toLowerCase() + " " + userLockUiDto.lockingString() + "!",null, userAccount.getId());
     }
 
     @Transactional

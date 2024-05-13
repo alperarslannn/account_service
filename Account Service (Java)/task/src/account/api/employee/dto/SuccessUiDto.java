@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SuccessUiDto {
     private String status;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String user;
     @JsonIgnore
     private Long id;

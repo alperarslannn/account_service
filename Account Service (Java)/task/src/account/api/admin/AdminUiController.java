@@ -83,5 +83,18 @@ public class AdminUiController {
                 .build();
     }
 
+    @PutMapping(value="/access")
+    @LogSecurityEvent
+    public ResponseEntity<SuccessUiDto> userAccountLockUpdate(@RequestBody UserLockUiDto userLockUiDto){
+        SuccessUiDto successUiDto = userAccountService.updateAccountLocking(userLockUiDto);
+        return new SecurityEventResponseEntity.Builder<>(successUiDto, HttpStatus.OK)
+                .eventName(userLockUiDto.getOperation().name().equals(UserLockUiDto.OperationType.LOCK.name()) ? LOCK_USER:UNLOCK_USER)
+                .path("/api/admin/user/access")
+                .date(Date.from(Instant.now()))
+                .objectAccountId(successUiDto.getId())
+                .object(userLockUiDto.getOperation().name().substring(0, 1).toUpperCase() + userLockUiDto.getOperation().name().substring(1).toLowerCase() + " user " + userLockUiDto.getUser().toLowerCase())
+                .build();
+    }
+
 
 }

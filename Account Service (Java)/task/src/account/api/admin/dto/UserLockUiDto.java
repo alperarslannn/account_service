@@ -18,6 +18,14 @@ public class UserLockUiDto {
         return user;
     }
 
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setOperation(OperationType operation) {
+        this.operation = operation;
+    }
+
     public OperationType getOperation() {
         return operation;
     }
